@@ -2,7 +2,7 @@
  * @Author: Hongzhifeng
  * @Date: 2022-06-28 15:47:36
  * @LastEditors: Hongzhifeng
- * @LastEditTime: 2022-07-20 13:42:16
+ * @LastEditTime: 2022-07-20 16:07:03
  * @Description:Webpack的基本配置：生产模式
  */
 // 生产运行指令：npx webpack --config ./config/webpack.prod.js
@@ -49,7 +49,10 @@ module.exports = {
         // __dirname 当前文件的文件夹绝对路径
         path: path.resolve(__dirname, '../dist'),
         // filename: 入口文件打包输出的文件名
-        filename: 'static/js/main.js', //js文件放置于js文件下
+        filename: 'static/js/[name].js', //js文件放置于js文件下,这一行[name].js则会和入口文件名字一样
+        chunkFilename: 'static/js/[name].chunk.js', // 动态导入输出资源命名方式[name].chunk.js
+        // 统一设置媒体资源
+        // assetModuleFilename: 'static/media/[name].[hash][ext]', // 图片、字体等资源命名方式（注意用hash）
         // clean原理,在打包前,将path整个目录内容清空,再进行打包（wep4需要用插件）
         clean: true // 自动将上次打包目录资源清空
     },
@@ -95,6 +98,7 @@ module.exports = {
                     }
                 },
                 generator: {
+                    // 也可以统一在输出配置中的assetModuleFilename设置
                     // 输出图片名称,存放到dist/static/images文件下下
                     // [hash:10] hash值取前10位,为图片生成唯一id
                     filename: 'static/images/[hash:10][ext][query]'
@@ -105,6 +109,7 @@ module.exports = {
                 test: /\.(ttf|woff2?|map4|map3|avi)$/,
                 type: 'asset/resource', //只写asset会转成base54，加上resource会对文件原封不动地输出
                 generator: {
+                    // 也可以统一在输出配置中的assetModuleFilename设置
                     filename: 'static/media/[hash:8][ext][query]' //输出名称
                 }
             },
@@ -135,8 +140,8 @@ module.exports = {
                         options: {
                             // presets: ['@babel/preset-env'], //: 一个智能预设，允许您使用最新的 JavaScript。
                             cacheDirectory: true, // 开启babel编译缓存
-                            cacheCompression: false , // 关闭缓存文件压缩，不压缩缓存文件
-                            plugins: ["@babel/plugin-transform-runtime"], // 减少代码体积  
+                            cacheCompression: false, // 关闭缓存文件压缩，不压缩缓存文件
+                            plugins: ['@babel/plugin-transform-runtime'] // 减少代码体积
                         }
                     }
                 ]
@@ -165,14 +170,15 @@ module.exports = {
         }),
         // 3.提取css成单独文件
         new MiniCssExtractPlugin({
-            filename: 'static/css/main.css' // 定义输出文件名和目录
+            filename: 'static/css/[name].css', // 定义输出文件名和目录
+            chunkFilename: 'static/css/[name].chunk.css' // 定义动态输出文件名和目录
         })
         // new CssMinimizerPlugin() // 4.css压缩也可以写到optimization.minimizer里面，效果一样的
     ],
-    // 优化
+    // 【六】优化
     optimization: {
         minimize: true,
-        // 压缩的操作(一般生产模式才需要)：minimizer允许通过提供一个或多个定制过的 TerserPlugin 实例，覆盖默认压缩工具
+        // (一) 压缩的操作(一般生产模式才需要)：minimizer允许通过提供一个或多个定制过的 TerserPlugin 实例，覆盖默认压缩工具
         minimizer: [
             // 4.压缩css
             new CssMinimizerPlugin(),
@@ -180,7 +186,33 @@ module.exports = {
             new TerserPlugin({
                 parallel: threads // 开启多进程和设置进程数量
             })
-        ]
+            // 6.压缩图片
+        ],
+        // (二) 代码分割配置
+        // （最终我们会使用单入口+代码分割+动态导入方式来进行配置。更新之前的配置文件。）
+        splitChunks: {
+            chunks: 'all' // 对所有模块都进行分割
+            // 其他内容用默认配置即可
+            // 以下是默认值
+            // minSize: 20000, // 分割代码最小的大小
+            // minRemainingSize: 0, // 类似于minSize，最后确保提取的文件大小不能为0
+            // minChunks: 1, // 至少被引用的次数，满足条件才会代码分割
+            // maxAsyncRequests: 30, // 按需加载时并行加载的文件的最大数量
+            // maxInitialRequests: 30, // 入口js文件最大并行请求数量
+            // enforceSizeThreshold: 50000, // 超过50kb一定会单独打包（此时会忽略minRemainingSize、maxAsyncRequests、maxInitialRequests）
+            // cacheGroups: { // 组，哪些模块要打包到一个组
+            //   defaultVendors: { // 组名
+            //     test: /[\\/]node_modules[\\/]/, // 需要打包到一起的模块
+            //     priority: -10, // 权重（越大越高）
+            //     reuseExistingChunk: true, // 如果当前 chunk 包含已从主 bundle 中拆分出的模块，则它将被重用，而不是生成新的模块
+            //   },
+            //   default: { // 其他没有写的配置会使用上面的默认值
+            //     minChunks: 2, // 这里的minChunks权重更大，至少两个入口文件才需要配置minChunks
+            //     priority: -20,
+            //     reuseExistingChunk: true,
+            //   },
+            // },
+        }
     },
     // devServer: {},// 生产模式不需要devServer
     // 【五】模式

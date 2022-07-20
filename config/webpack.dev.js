@@ -2,7 +2,7 @@
  * @Author: Hongzhifeng
  * @Date: 2022-06-28 15:47:36
  * @LastEditors: Hongzhifeng
- * @LastEditTime: 2022-07-20 13:42:56
+ * @LastEditTime: 2022-07-20 16:11:10
  * @Description:Webpack的基本配置：开发模式
  */
 // 开发环境运行指令：npx webpack serve --config ./config/webpack.dev.js
@@ -24,7 +24,10 @@ module.exports = {
         // __dirname 当前文件的文件夹绝对路径
         path: undefined, //因为开发模式没有输出，所以不需要指定输出路径，path.resolve(__dirname, '../dist'),
         // filename: 入口文件打包输出的文件名
-        filename: 'static/js/main.js' //js文件放置于js文件下
+        filename: 'static/js/[name].js', //js文件放置于js文件下,这一行[name].js则会和入口文件名字一样
+        chunkFilename: 'static/js/[name].chunk.js', // 动态导入输出资源命名方式[name].chunk.js
+        // 统一设置媒体资源
+        assetModuleFilename: 'static/media/[name].[hash][ext]', // 图片、字体等资源命名方式（注意用hash）
         // 开启devServer模式下clean可以不需要，因为devServer不会打包到dist
         // clean原理,在打包前,将path整个目录内容清空,再进行打包（wep4需要用插件）
         // clean: true // 自动将上次打包目录资源清空
@@ -88,19 +91,19 @@ module.exports = {
                                 maxSize: 10 * 1024 //最大10kb
                             }
                         },
-                        generator: {
-                            // 输出图片名称,存放到dist/static/images文件下下
-                            // [hash:10] hash值取前10位,为图片生成唯一id
-                            filename: 'static/images/[hash:10][ext][query]'
-                        }
+                        // generator: {
+                        //     // 输出图片名称,存放到dist/static/images文件下下
+                        //     // [hash:10] hash值取前10位,为图片生成唯一id
+                        //     filename: 'static/images/[hash:10][ext][query]'
+                        // }
                     },
                     // 3.处理字体图标等其他资源
                     {
                         test: /\.(ttf|woff2?|map4|map3|avi)$/,
                         type: 'asset/resource', //只写asset会转成base54，加上resource会对文件原封不动地输出
-                        generator: {
-                            filename: 'static/media/[hash:8][ext][query]' //输出名称
-                        }
+                        // generator: {
+                        //     filename: 'static/media/[hash:8][ext][query]' //输出名称
+                        // }
                     },
                     // 4.处理js：babel-loader
                     {
@@ -130,7 +133,7 @@ module.exports = {
                                     // presets: ['@babel/preset-env'], //: 一个智能预设，允许您使用最新的 JavaScript。
                                     cacheDirectory: true, // 开启babel编译缓存
                                     cacheCompression: false, // 关闭缓存文件压缩，不压缩缓存文件
-                                    plugins: ["@babel/plugin-transform-runtime"], // 减少代码体积,模块越多作用越明显
+                                    plugins: ['@babel/plugin-transform-runtime'] // 减少代码体积,模块越多作用越明显
                                 }
                             }
                         ]

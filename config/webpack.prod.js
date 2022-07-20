@@ -2,7 +2,7 @@
  * @Author: Hongzhifeng
  * @Date: 2022-06-28 15:47:36
  * @LastEditors: Hongzhifeng
- * @LastEditTime: 2022-07-20 16:07:03
+ * @LastEditTime: 2022-07-20 17:06:42
  * @Description:Webpack的基本配置：生产模式
  */
 // 生产运行指令：npx webpack --config ./config/webpack.prod.js
@@ -12,6 +12,8 @@ const ESLintWebpackPlugin = require('eslint-webpack-plugin'); //1.ESLint插件
 const HtmlWebpackPlugin = require('html-webpack-plugin'); //2.html插件
 const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // 3.webpack5中的新插件，提取css成单独的文件:npm i mini-css-extract-plugin -D
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); // 4.压缩css代码：npm i css-minimizer-webpack-plugin -D// html默认会压缩
+const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin'); // 5.资源预加载
+
 // 开启多进程(我们目前打包的内容都很少，所以因为启动进程开销原因，使用多进程打包实际上会显著的让我们打包时间变得很长。所以当项目大的时候才会感觉明显提升时间)
 const os = require('os'); // nodejs核心模块，直接使用
 const threads = os.cpus().length; // cpu核数
@@ -172,8 +174,14 @@ module.exports = {
         new MiniCssExtractPlugin({
             filename: 'static/css/[name].css', // 定义输出文件名和目录
             chunkFilename: 'static/css/[name].chunk.css' // 定义动态输出文件名和目录
-        })
+        }),
         // new CssMinimizerPlugin() // 4.css压缩也可以写到optimization.minimizer里面，效果一样的
+        // 5.会在浏览器空闲的时候加载
+        new PreloadWebpackPlugin({
+            rel: 'preload', // preload兼容性更好，告诉浏览器立即加载资源
+            as: 'script'
+            // rel: 'prefetch' // prefetch兼容性更差，告诉浏览器在空闲时才开始加载资源
+        })
     ],
     // 【六】优化
     optimization: {

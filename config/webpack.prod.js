@@ -2,7 +2,7 @@
  * @Author: Hongzhifeng
  * @Date: 2022-06-28 15:47:36
  * @LastEditors: Hongzhifeng
- * @LastEditTime: 2022-07-06 10:45:39
+ * @LastEditTime: 2022-07-20 13:42:16
  * @Description:Webpack的基本配置：生产模式
  */
 // 生产运行指令：npx webpack --config ./config/webpack.prod.js
@@ -135,7 +135,8 @@ module.exports = {
                         options: {
                             // presets: ['@babel/preset-env'], //: 一个智能预设，允许您使用最新的 JavaScript。
                             cacheDirectory: true, // 开启babel编译缓存
-                            cacheCompression: false // 关闭缓存文件压缩，不压缩缓存文件
+                            cacheCompression: false , // 关闭缓存文件压缩，不压缩缓存文件
+                            plugins: ["@babel/plugin-transform-runtime"], // 减少代码体积  
                         }
                     }
                 ]

@@ -1,0 +1,2 @@
+!function(){"use strict";function o(o,n){return o-n}function n(){for(var o=arguments.length,n=new Array(o),e=0;e<o;e++)n[e]=arguments[e];return n.reduce(((o,n)=>o+n),0)}console.log(o(2,1)),console.log(n(1,2,3,4));let e=o(2,1);console.log(e);let l=n(1,2,3,4,5);console.log(l)}();
+//# sourceMappingURL=main.js.map

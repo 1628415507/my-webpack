@@ -2,7 +2,7 @@
  * @Author: Hongzhifeng
  * @Date: 2022-06-28 15:36:36
  * @LastEditors: Hongzhifeng
- * @LastEditTime: 2022-07-20 16:12:42
+ * @LastEditTime: 2022-07-20 18:07:44
  * @Description:
  */
 // 想要webpack打包资源，必须引入该资源
@@ -40,10 +40,12 @@ if (module.hot) {
 // (四)测试splitChunks配置的按需加载，动态导入
 document.getElementById('splitChunksText_btn').onClick = function () {
     console.log('【测试splitChunks配置的按需加载，动态导入】-42');
-    // eslint不能识别动态导入语法，会对动态导入语法（import）报错，需要修改eslint配置文件
+    /* eslint不能识别动态导入语法，会对动态导入语法（import）报错，需要修改eslint配置文件
     // webpackChunkName: "math"：这是webpack动态导入模块命名的方式
-    // "math"将来就会作为[name]的值显示。
-    // import(/* webpackChunkName: "math" */'./js/math.js').then(({ mul }) => {
+     "math"将来就会作为[name]的值显示。
+    */
+    // 测试动态引入
+    // import(/* webpackChunkName: "math" */ './js/math.js').then(({ mul }) => {
     //     console.log('【 按需加载，动态导入 】-42', mul(2, 1));
     // });
 };

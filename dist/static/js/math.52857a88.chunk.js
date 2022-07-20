@@ -1,2 +1,2 @@
 "use strict";(self.webpackChunkwebpack5=self.webpackChunkwebpack5||[]).push([[600],{722:function(c,e,n){n.r(e),n.d(e,{mul:function(){return u}});const u=(c,e)=>(console.log("【 按需加载，动态导入 】-9"),c*e)}}]);
-//# sourceMappingURL=math.chunk.js.map
+//# sourceMappingURL=math.52857a88.chunk.js.map

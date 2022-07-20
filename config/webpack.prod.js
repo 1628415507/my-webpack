@@ -2,7 +2,7 @@
  * @Author: Hongzhifeng
  * @Date: 2022-06-28 15:47:36
  * @LastEditors: Hongzhifeng
- * @LastEditTime: 2022-07-20 17:06:42
+ * @LastEditTime: 2022-07-20 18:07:10
  * @Description:Webpack的基本配置：生产模式
  */
 // 生产运行指令：npx webpack --config ./config/webpack.prod.js
@@ -51,8 +51,8 @@ module.exports = {
         // __dirname 当前文件的文件夹绝对路径
         path: path.resolve(__dirname, '../dist'),
         // filename: 入口文件打包输出的文件名
-        filename: 'static/js/[name].js', //js文件放置于js文件下,这一行[name].js则会和入口文件名字一样
-        chunkFilename: 'static/js/[name].chunk.js', // 动态导入输出资源命名方式[name].chunk.js
+        filename: 'static/js/[name].[contenthash:8].js', //js文件放置于js文件下,这一行[name].js则会和入口文件名字一样
+        chunkFilename: 'static/js/[name].[contenthash:8].chunk.js', // 动态导入输出资源命名方式[name].chunk.js
         // 统一设置媒体资源
         // assetModuleFilename: 'static/media/[name].[hash][ext]', // 图片、字体等资源命名方式（注意用hash）
         // clean原理,在打包前,将path整个目录内容清空,再进行打包（wep4需要用插件）
@@ -220,6 +220,12 @@ module.exports = {
             //     reuseExistingChunk: true,
             //   },
             // },
+        },
+        // (三) 提取runtime文件
+        // 只针对有变化的文件重新打包，没有变化的则使用缓存
+        // runtime 文件只保存文件的 hash 值和它们与文件关系，整个文件体积就比较小，所以变化重新请求的代价也小。
+        runtimeChunk: {
+            name: entrypoint => `runtime~${entrypoint.name}` // runtime文件命名规则
         }
     },
     // devServer: {},// 生产模式不需要devServer

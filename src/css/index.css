@@ -1,8 +1,0 @@
-.box1{
-  display: flex;
-  width: 200px;
-  height: 100px;
-  background-color: pink;
-  background-image: url('../images/1.jpeg');
-  /* background-size: cover; */
-}

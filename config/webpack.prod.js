@@ -2,7 +2,7 @@
  * @Author: Hongzhifeng
  * @Date: 2022-06-28 15:47:36
  * @LastEditors: Hongzhifeng
- * @LastEditTime: 2022-07-20 18:07:10
+ * @LastEditTime: 2022-07-21 09:28:35
  * @Description:Webpack的基本配置：生产模式
  */
 // 生产运行指令：npx webpack --config ./config/webpack.prod.js
@@ -46,12 +46,14 @@ module.exports = {
     entry: './src/main.js',
     // 【二】输出
     output: {
-        // path: 文件输出目录，必须是绝对路径
-        // path.resolve()方法返回一个绝对路径
+        // path: 文件输出目录，必须是绝对路径，path.resolve()方法返回一个绝对路径
         // __dirname 当前文件的文件夹绝对路径
         path: path.resolve(__dirname, '../dist'),
-        // filename: 入口文件打包输出的文件名
+        // 【filename】：入口文件打包输出的文件名
         filename: 'static/js/[name].[contenthash:8].js', //js文件放置于js文件下,这一行[name].js则会和入口文件名字一样
+        // 【什么是chunk？】打包的资源就是chunk，输出出去叫bundle。
+        // chunk的name是啥呢？ 比如： entry中xxx: "./src/xxx.js", name就是xxx。注意是前面的xxx，和文件名无关。
+        // 为什么需要这样命名呢？如果还是之前写法main.js，那么打包生成两个js文件都会叫做main.js会发生覆盖。(实际上会直接报错的)
         chunkFilename: 'static/js/[name].[contenthash:8].chunk.js', // 动态导入输出资源命名方式[name].chunk.js
         // 统一设置媒体资源
         // assetModuleFilename: 'static/media/[name].[hash][ext]', // 图片、字体等资源命名方式（注意用hash）

@@ -2,7 +2,7 @@
  * @Author: Hongzhifeng
  * @Date: 2022-06-28 15:47:36
  * @LastEditors: Hongzhifeng
- * @LastEditTime: 2022-07-21 09:28:35
+ * @LastEditTime: 2022-07-21 15:26:37
  * @Description:Webpack的基本配置：生产模式
  */
 // 生产运行指令：npx webpack --config ./config/webpack.prod.js
@@ -13,7 +13,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin'); //2.html插件
 const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // 3.webpack5中的新插件，提取css成单独的文件:npm i mini-css-extract-plugin -D
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); // 4.压缩css代码：npm i css-minimizer-webpack-plugin -D// html默认会压缩
 const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin'); // 5.资源预加载
-
+const WorkboxPlugin = require('workbox-webpack-plugin'); // 6.PWA-离线访问页面
 // 开启多进程(我们目前打包的内容都很少，所以因为启动进程开销原因，使用多进程打包实际上会显著的让我们打包时间变得很长。所以当项目大的时候才会感觉明显提升时间)
 const os = require('os'); // nodejs核心模块，直接使用
 const threads = os.cpus().length; // cpu核数
@@ -183,6 +183,13 @@ module.exports = {
             rel: 'preload', // preload兼容性更好，告诉浏览器立即加载资源
             as: 'script'
             // rel: 'prefetch' // prefetch兼容性更差，告诉浏览器在空闲时才开始加载资源
+        }),
+        // 6.PWA,然后在main.js中注册使用
+        new WorkboxPlugin.GenerateSW({
+            // 这些选项帮助快速启用 ServiceWorkers
+            // 不允许遗留任何“旧的” ServiceWorkers
+            clientsClaim: true,
+            skipWaiting: true
         })
     ],
     // 【六】优化

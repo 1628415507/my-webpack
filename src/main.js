@@ -2,7 +2,7 @@
  * @Author: Hongzhifeng
  * @Date: 2022-06-28 15:36:36
  * @LastEditors: Hongzhifeng
- * @LastEditTime: 2022-07-21 10:16:11
+ * @LastEditTime: 2022-07-21 15:25:21
  * @Description:
  */
 // 想要webpack打包资源，必须引入该资源
@@ -81,3 +81,27 @@ promise.then(() => {
 // (2)测试babel自动动按需引入
 const arr = [1, 2, 3, 5];
 console.log('【 (五)-2测试babel自动动按需引入 】-74', arr.includes(3));
+
+// ========================================================
+
+// (六) 测试PWA，离线访问页面（缺点兼容性较差）
+/*
+此时如果直接通过 VSCode 访问打包后页面，在浏览器控制台会发现 `SW registration failed`。
+因为我们打开的访问路径是：`http://127.0.0.1:5500/dist/index.html`。
+此时页面会去请求 `service-worker.js` 文件，请求路径是：`http://127.0.0.1:5500/service-worker.js`，
+这样找不到会 404。
+npm i serve -g：运行打包文件dist时，保证项目运行的根目录为dist
+运行指令：serve dist
+*/
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker
+            .register('/service-worker.js')
+            .then(registration => {
+                console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}

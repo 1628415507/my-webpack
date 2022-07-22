@@ -2,10 +2,9 @@
  * @Author: Hongzf
  * @Date: 2022-07-21 16:58:50
  * @LastEditors: Hongzf
- * @LastEditTime: 2022-07-22 13:51:27
+ * @LastEditTime: 2022-07-22 14:58:43
  * @Description:合并生产环境与开发环境配置
  */
-// webpack.prod.js
 const path = require('path');
 const ESLintWebpackPlugin = require('eslint-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -21,6 +20,10 @@ const CopyPlugin = require('copy-webpack-plugin'); // 将public下面的资源�
 // 【vue所需配置】
 const { VueLoaderPlugin } = require('vue-loader');
 const { DefinePlugin } = require('webpack');
+// elment-plus按需导入（镜像安装）：cnpm install -D unplugin-vue-components unplugin-auto-import
+const AutoImport = require('unplugin-auto-import/webpack');
+const Components = require('unplugin-vue-components/webpack');
+const { ElementPlusResolver } = require('unplugin-vue-components/resolvers');
 
 const isProduction = process.env.NODE_ENV === 'production';
 // 返回处理样式loader函数
@@ -143,6 +146,13 @@ module.exports = {
         new DefinePlugin({
             __VUE_OPTIONS_API__: 'true',
             __VUE_PROD_DEVTOOLS__: 'false'
+        }),
+        // vue按需导入
+        AutoImport({
+            resolvers: [ElementPlusResolver()]
+        }),
+        Components({
+            resolvers: [ElementPlusResolver()]
         })
     ].filter(Boolean),
     mode: isProduction ? 'production' : 'development',

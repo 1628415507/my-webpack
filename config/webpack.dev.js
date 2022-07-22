@@ -3,7 +3,7 @@ const ESLintWebpackPlugin = require('eslint-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 // vue配置
-const { VueLoaderPlugin } = require('vue-loader')
+const { VueLoaderPlugin } = require('vue-loader');
 
 const getStyleLoaders = preProcessor => {
     return [
@@ -87,7 +87,7 @@ module.exports = {
                     {
                         test: /\.vue$/,
                         loader: 'vue-loader'
-                      }
+                    }
                 ]
             }
         ]
@@ -124,6 +124,7 @@ module.exports = {
                 }
             ]
         }),
+        // VueLoader
         new VueLoaderPlugin()
     ],
     // 【七】开发服务器
@@ -144,8 +145,8 @@ module.exports = {
         port: '3000', // 启动服务器端口号
         open: true, // 是否自动打开浏览器
         hot: true, // 开启HMR功能（只能用于开发环境，生产环境不需要了
-        compress: true,
-        historyApiFallback: true // 解决react-router刷新404问题
+        // compress: true,
+        historyApiFallback: true // 解决路由刷新404问题
     },
     // 【五】模式
     mode: 'development',

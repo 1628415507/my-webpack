@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/1628415507/my-webpack#readme",
   "devDependencies": {
+    "@babel/eslint-parser": "^7.18.9",
+    "@vue/cli-plugin-babel": "^5.0.8",
     "vue-loader": "^17.0.0",
     "vue-template-compiler": "^2.7.7",
     "webpack": "^5.73.0",

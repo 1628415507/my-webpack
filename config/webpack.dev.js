@@ -1,3 +1,10 @@
+/*
+ * @Author: Hongzf
+ * @Date: 2022-07-21 16:58:50
+ * @LastEditors: Hongzf
+ * @LastEditTime: 2022-07-22 13:45:14
+ * @Description: 开发环境配置
+ */
 const path = require('path');
 const ESLintWebpackPlugin = require('eslint-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');

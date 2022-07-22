@@ -1,3 +1,10 @@
+/*
+ * @Author: Hongzf
+ * @Date: 2022-07-21 16:58:50
+ * @LastEditors: Hongzf
+ * @LastEditTime: 2022-07-22 13:45:24
+ * @Description: 生产环境配置
+ */
 // webpack.prod.js
 const path = require('path');
 const ESLintWebpackPlugin = require('eslint-webpack-plugin');

@@ -1,135 +1,201 @@
 /*
  * @Author: Hongzf
- * @Date: 2022-06-28 15:47:36
+ * @Date: 2022-07-21 16:58:50
  * @LastEditors: Hongzf
- * @LastEditTime: 2022-07-03 22:09:25
- * @Description:Webpack的基本配置
+ * @LastEditTime: 2022-07-22 13:51:27
+ * @Description:合并生产环境与开发环境配置
  */
-
-const path = require('path'); // Node.js的核心模块，专门用来处理文件路径
+// webpack.prod.js
+const path = require('path');
 const ESLintWebpackPlugin = require('eslint-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+// 【生产环境配置】
+const MiniCssExtractPlugin = require('mini-css-extract-plugin'); //提取css成单独文件
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); //css压缩
+const TerserWebpackPlugin = require('terser-webpack-plugin');
+// 图片压缩
+// npm i image-minimizer-webpack-plugin imagemin -D
+// 无损压缩（需要用镜像cnpm下载）：cnpm install imagemin-gifsicle imagemin-jpegtran imagemin-optipng imagemin-svgo -D
+const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin'); // 将public下面的资源复制到dist目录去（除了index.html）
+// 【vue所需配置】
+const { VueLoaderPlugin } = require('vue-loader');
+const { DefinePlugin } = require('webpack');
+
+const isProduction = process.env.NODE_ENV === 'production';
+// 返回处理样式loader函数
+const getStyleLoaders = preProcessor => {
+    return [
+        isProduction ? MiniCssExtractPlugin.loader : 'vue-style-loader',
+        'css-loader',
+        {
+            loader: 'postcss-loader',
+            options: {
+                postcssOptions: {
+                    plugins: [
+                        'postcss-preset-env' // 能解决大多数样式兼容性问题
+                    ]
+                }
+            }
+        },
+        preProcessor
+    ].filter(Boolean);
+};
 
 module.exports = {
-    // 【一】入口
-    // 相对路径和绝对路径都行
     entry: './src/main.js',
-    // 【二】输出
     output: {
-        // path: 文件输出目录，必须是绝对路径
-        // path.resolve()方法返回一个绝对路径
-        // __dirname 当前文件的文件夹绝对路径
-        path: path.resolve(__dirname, 'dist'),
-        // filename: 入口文件打包输出的文件名
-        filename: 'static/js/main.js' //js文件放置于js文件下
-        // 开启devServer模式下clean可以不需要，因为devServer不会打包到dist
-        // clean原理,在打包前,将path整个目录内容清空,再进行打包（wep4需要用插件）
-        // clean: true // 自动将上次打包目录资源清空
+        path: isProduction ? path.resolve(__dirname, '../dist') : undefined,
+        filename: isProduction ? 'static/js/[name].[contenthash:10].js' : 'static/js/[name].js',
+        chunkFilename: isProduction ? 'static/js/[name].[contenthash:10].chunk.js' : 'static/js/[name].chunk.js',
+        assetModuleFilename: 'static/js/[hash:10][ext][query]',
+        clean: true
     },
-    // 【三】 加载器
     module: {
         rules: [
-            // loader官方文档：https://webpack.docschina.org/loaders/
-            // loader作用：帮助webpack识别不能识别的语言，如css等
-            // 1.处理样式
-            // ① css-loader
             {
-                test: /\.css$/, // 用来匹配 .css 结尾的文件
-                // use 数组里面 Loader 执行顺序是从右到左，从下到上
-                use: ['style-loader', 'css-loader']
+                // 用来匹配 .css 结尾的文件
+                test: /\.css$/,
+                // use 数组里面 Loader 执行顺序是从右到左
+                use: getStyleLoaders()
             },
-            // ② less-loader
             {
                 test: /\.less$/,
-                // loader:'xxx',//只能写一个，use可以多个
-                use: [
-                    //use可以多个
-                    'style-loader',
-                    'css-loader',
-                    'less-loader' // 将less编译成css文件
-                ]
+                use: getStyleLoaders('less-loader')
             },
-            // ③ sass-loader
             {
                 test: /\.s[ac]ss$/,
-                use: [
-                    'style-loader',
-                    'css-loader',
-                    'sass-loader' // 将sass编译成css文件
-                ]
+                use: getStyleLoaders('sass-loader')
             },
-            // ④ stylus-loader
-            // {
-            //     test: /\.styl$/,
-            //     use: [
-            //         'style-loader',
-            //         'css-loader',
-            //         'stylus-loader' // 将stylus编译成css文件
-            //     ]
-            // }
-            // 2.处理图片
-            // 过去在 Webpack4 时，我们处理图片资源通过 `file-loader` 和 `url-loader` 进行处理
-            // 现在 Webpack5 已经将两个 Loader 功能内置到 Webpack 里了，我们只需要简单配置即可处理图片资源
             {
-                test: /\.(png|jpe?g|gif|webp)$/, //匹配图片格式
-                type: 'asset', //设置type: 'asset'
+                test: /\.styl$/,
+                use: getStyleLoaders('stylus-loader')
+            },
+            {
+                test: /\.(png|jpe?g|gif|svg)$/,
+                type: 'asset',
                 parser: {
                     dataUrlCondition: {
-                        // 小于10kb的图片会被base64处理打包到dist,大于10k的话不会打包到dist,而是发请求获取
-                        // 优点，减少请求次数，缺点：体积会变大
-                        maxSize: 10 * 1024 //最大10kb
+                        maxSize: 10 * 1024 // 小于10kb的图片会被base64处理
                     }
-                },
-                generator: {
-                    // 输出图片名称,存放到dist/static/images文件下下
-                    // [hash:10] hash值取前10位,为图片生成唯一id
-                    filename: 'static/images/[hash:10][ext][query]'
                 }
             },
-            // 3.处理字体图标等其他资源
             {
-                test: /\.(ttf|woff2?|map4|map3|avi)$/,
-                type: 'asset/resource', //只写asset会转成base54，加上resource会对文件原封不动地输出
-                generator: {
-                    filename: 'static/media/[hash:8][ext][query]' //输出名称
+                test: /\.(ttf|woff2?)$/,
+                type: 'asset/resource'
+            },
+            {
+                test: /\.(jsx|js)$/,
+                include: path.resolve(__dirname, '../src'),
+                loader: 'babel-loader',
+                options: {
+                    cacheDirectory: true,
+                    cacheCompression: false,
+                    plugins: [
+                        // "@babel/plugin-transform-runtime" // presets中包含了
+                    ]
                 }
             },
-            // 4.处理js：babel-loader
+            // vue-loader不支持oneOf
             {
-                test: /\.js$/,
-                exclude: /node_modules/, // 排除node_modules代码不编译
-                loader: 'babel-loader'
-                // 写到babel.config.js中，方便修改
-                // options:{
-                //     presets: ['@babel/preset-env'] //: 一个智能预设，允许您使用最新的 JavaScript。
-                // }
+                test: /\.vue$/,
+                loader: 'vue-loader', // 内部会给vue文件注入HMR功能代码
+                options: {
+                    // 开启缓存
+                    cacheDirectory: path.resolve(__dirname, 'node_modules/.cache/vue-loader')
+                }
             }
         ]
     },
-    // 【四】 插件
     plugins: [
-        // 1.配置eslint插件
         new ESLintWebpackPlugin({
-            // 指定检查文件的根目录
-            context: path.resolve(__dirname, 'src')
-            // 配置写在项目根目录下的.eslintrc.js和.eslintignore中，系统会自动识别这两个文件
+            context: path.resolve(__dirname, '../src'),
+            exclude: 'node_modules',
+            cache: true,
+            cacheLocation: path.resolve(__dirname, '../node_modules/.cache/.eslintcache')
         }),
-        // 2.配置html插件
-        // 该插件将为你生成一个 HTML5 文件， 在 body 中使用 `script` 标签引入你所有 webpack 生成的 bundle。 只需添加该插件到你的 webpack 配置中
-        // npm i html-webpack-plugin -D ：https://webpack.docschina.org/plugins/html-webpack-plugin/
         new HtmlWebpackPlugin({
-            // 以 public/index.html 为模板创建文件
-            // 新的html文件有两个特点：1. 内容和源文件一致 2. 自动引入打包生成的js等资源
-            template: path.resolve(__dirname, 'public/index.html') //设置源文件
+            template: path.resolve(__dirname, '../public/index.html')
+        }),
+        isProduction &&
+            new CopyPlugin({
+                patterns: [
+                    {
+                        from: path.resolve(__dirname, '../public'),
+                        to: path.resolve(__dirname, '../dist'),
+                        toType: 'dir',
+                        noErrorOnMissing: true,
+                        globOptions: {
+                            ignore: ['**/index.html']
+                        },
+                        info: {
+                            minimized: true
+                        }
+                    }
+                ]
+            }),
+        isProduction &&
+            new MiniCssExtractPlugin({
+                filename: 'static/css/[name].[contenthash:10].css',
+                chunkFilename: 'static/css/[name].[contenthash:10].chunk.css'
+            }),
+        new VueLoaderPlugin(),
+        new DefinePlugin({
+            __VUE_OPTIONS_API__: 'true',
+            __VUE_PROD_DEVTOOLS__: 'false'
         })
-    ],
-    // 【六】开发服务器：使用devServer的话开发指令需要用：npx webpack serve
-    // 自动监测代码变化，自动进行编译（不会打包到dist，是在内存中临时打包的）
-    devServer: {
-        host: 'localhost', // 启动服务器域名
-        port: '3000', // 启动服务器端口号
-        open: true // 是否自动打开浏览器
+    ].filter(Boolean),
+    mode: isProduction ? 'production' : 'development',
+    devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
+    optimization: {
+        minimize: isProduction, //判断是否需要压缩
+        // 压缩的操作
+        minimizer: [
+            new CssMinimizerPlugin(),
+            new TerserWebpackPlugin(),
+            new ImageMinimizerPlugin({
+                minimizer: {
+                    implementation: ImageMinimizerPlugin.imageminGenerate,
+                    options: {
+                        plugins: [
+                            ['gifsicle', { interlaced: true }],
+                            ['jpegtran', { progressive: true }],
+                            ['optipng', { optimizationLevel: 5 }],
+                            [
+                                'svgo',
+                                {
+                                    plugins: [
+                                        'preset-default',
+                                        'prefixIds',
+                                        {
+                                            name: 'sortAttrs',
+                                            params: {
+                                                xmlnsOrder: 'alphabetical'
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        ]
+                    }
+                }
+            })
+        ],
+        splitChunks: {
+            chunks: 'all'
+        },
+        runtimeChunk: {
+            name: entrypoint => `runtime~${entrypoint.name}`
+        }
     },
-    // 【五】模式
-    mode: 'development' // 开发模式
+    resolve: {
+        extensions: ['.vue', '.js', '.json']
+    },
+    devServer: {
+        host: 'localhost',
+        port: 3000,
+        open: true,
+        hot: true, // 开启HMR
+        historyApiFallback: true // 解决前端路由刷新404问题
+    }
 };

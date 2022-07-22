@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run dev",
-    "dev": "cross-env NODE_ENV=development webpack serve --config ./config/webpack.dev.js",
-    "build": "cross-env NODE_ENV=production webpack --config ./config/webpack.prod.js"
+    "dev": "cross-env NODE_ENV=development webpack serve --config ./config/webpack.config.js",
+    "build": "cross-env NODE_ENV=production webpack --config ./config/webpack.config.js"
   },
   "repository": {
     "type": "git",

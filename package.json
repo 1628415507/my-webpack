@@ -37,6 +37,7 @@
     "postcss-preset-env": "^7.7.2",
     "sass-loader": "^13.0.2",
     "stylus-loader": "^7.0.0",
+    "vue": "^3.2.37",
     "vue-style-loader": "^4.1.3"
   }
 }
